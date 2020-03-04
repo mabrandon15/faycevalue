@@ -1,0 +1,36 @@
+<%- include("../partials/header") %>
+
+<div class="container">
+  <header class="jumbotron">
+    <div class="container">
+      <h1>Welcome to FAYCE Value!</h1>
+      <p>View our hand-picked all-you-can-eat restaurants</p>
+      <p>
+        <a class="btn btn-primary btn-lg" href="/restaurants/new"
+          >Add New Restaurant</a
+        >
+      </p>
+    </div>
+  </header>
+
+  <div class="row text-center">
+    <% restaurants.forEach(function(restaurant) { %>
+    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+      <div class="card">
+        <img
+          src="<%=restaurant.image%>"
+          class="card-img-top"
+          alt="<%= restaurant.name %>"
+        />
+        <div class="card-body">
+          <h5 class="card-title"><%= restaurant.name %></h5>
+          <a href="/restaurants/<%= restaurant._id %>" class="btn btn-primary"
+            >More Info</a
+          >
+        </div>
+      </div>
+    </div>
+    <% }) %>
+  </div>
+</div>
+<%- include("../partials/footer") %>

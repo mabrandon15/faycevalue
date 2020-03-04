@@ -1,0 +1,88 @@
+<%- include("../partials/header") %>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-3">
+      <div id="map"></div>
+    </div>
+    <div class="col-md-9">
+      <div class="card">
+        <img class="card-img-top" src="<%= restaurant.image %>" />
+        <div class="card-body">
+          <p class="float-right">$9.00/night</p>
+          <h4 class="card-title"><a href=""><%= restaurant.name %></a></h4>
+          <p class="card-text"><%= restaurant.description %></p>
+          <p>
+            <em>
+              Submitted by <%= restaurant.author.username %>
+            </em>
+          </p>
+          <% if (currentUser && restaurant.author.id.equals(currentUser._id)) {
+          %>
+          <a
+            class="btn btn-warning"
+            href="/restaurants/<%= restaurant._id %>/edit"
+            >Edit Restaurant</a
+          >
+          <form
+            class="delete-form"
+            action="/restaurants/<%= restaurant._id %>?_method=DELETE"
+            method="POST"
+          >
+            <button class="btn btn-danger">Delete</button>
+          </form>
+          <% } %>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <div class="text-right">
+            <a
+              class="btn btn-success"
+              href="/restaurants/<%= restaurant._id %>/comments/new"
+              >Add Comment</a
+            >
+          </div>
+          <hr />
+          <div class="row"></div>
+            <% restaurant.comments.forEach(function(comment) { %>
+              <div class="col-md-12">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="float-left w-75">
+                      <p class="card-title"><%= comment.author.username %></p>
+                      <p class="card-text"><%= comment.text %></p>
+                    </div>
+                    <div id="comment-right" class="float-right">
+                      <p>
+                        10 days ago
+                      </p>
+                      <% if (currentUser && comment.author.id.equals(currentUser._id)) { %>
+                        <div id="comment-buttons" class="float-right">
+                          <a class="btn btn-sm btn-warning" href="/restaurants/<%= restaurant._id %>/comments/<%= comment._id %>/edit">
+                            Edit
+                          </a>
+                          <form
+                            action="/restaurants/<%= restaurant._id %>/comments/<%= comment._id %>?_method=DELETE"
+                            method="POST"
+                            class="delete-form"
+                          >
+                            <button class="btn btn-sm btn-danger"/>Delete</button>
+                          </form>
+                          </div>
+                        <% } %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<a href="/restaurants">Go back!</a>
+
+<%- include("../partials/footer") %>

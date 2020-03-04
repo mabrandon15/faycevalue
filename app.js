@@ -53,6 +53,6 @@ app.use(indexRoutes);
 app.use(restaurantRoutes);
 app.use(commentRoutes);
 
-app.listen(3000, function() {
+app.listen(process.env.PORT || 3000, function() {
   console.log("FAYCEValue server hosted on port 3000");
 });

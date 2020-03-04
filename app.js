@@ -18,7 +18,9 @@ var indexRoutes = require("./routes/index");
 mongoose.set("useNewUrlParser", true);
 mongoose.set("useUnifiedTopology", true);
 mongoose.set("useFindAndModify", false);
-mongoose.connect("mongodb://localhost/fayce_value");
+mongoose.connect(
+  "mongodb+srv://mabrandon15:985BabttwisbTwsfe@cluster0-7m7wu.mongodb.net/fayce_value?retryWrites=true&w=majority"
+);
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + "/public"));

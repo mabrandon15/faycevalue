@@ -2,16 +2,48 @@ var express = require("express");
 var router = express.Router();
 var Restaurant = require("../models/restaurant");
 var middleware = require("../middleware");
+var NodeGeocoder = require("node-geocoder");
+
+var options = {
+  provider: "google",
+  httpAdapter: "https",
+  apiKey: process.env.GEOCODER_API_KEY,
+  formatter: null
+};
+
+var geocoder = NodeGeocoder(options);
 
 // RESTAURANT INDEX ROUTE
 router.get("/restaurants", function(req, res) {
-  Restaurant.find({}, function(err, allRestaurants) {
-    if (err) {
-      console.log(err);
-    } else {
-      res.render("restaurants/index", { restaurants: allRestaurants });
-    }
-  });
+  var noMatch = null;
+  if (req.query.search) {
+    const regex = new RegExp(escapeRegex(req.query.search), "gi");
+    // Get all restaurants from DB
+    Restaurant.find({ name: regex }, function(err, allRestaurants) {
+      if (err) {
+        console.log(err);
+      } else {
+        if (allRestaurants.length < 1) {
+          noMatch = "No restaurants match that query, please try again.";
+        }
+        res.render("restaurants/index", {
+          restaurants: allRestaurants,
+          noMatch: noMatch
+        });
+      }
+    });
+  } else {
+    Restaurant.find({}, function(err, allRestaurants) {
+      if (err) {
+        console.log(err);
+      } else {
+        res.render("restaurants/index", {
+          restaurants: allRestaurants,
+          noMatch: noMatch
+        });
+      }
+    });
+  }
 });
 
 // RESTAURANT NEW ROUTE
@@ -19,29 +51,45 @@ router.get("/restaurants/new", middleware.isLoggedIn, function(req, res) {
   res.render("restaurants/new");
 });
 
-// RESTAURANT CREATE ROUTE
+//CREATE - add new restaurant to DB
 router.post("/restaurants", middleware.isLoggedIn, function(req, res) {
+  // get data from form and add to restaurants array
   var name = req.body.name;
   var image = req.body.image;
-  var description = req.body.description;
+  var cost = req.body.cost;
+  var desc = req.body.description;
   var author = {
     id: req.user._id,
     username: req.user.username
   };
-  var newRestaurant = {
-    name: name,
-    image: image,
-    description: description,
-    author: author
-  };
-  Restaurant.create(newRestaurant, function(err, newlyCreated) {
-    if (err) {
-      console.log(err);
-    } else {
-      console.log(newlyCreated);
-      req.flash("success", "Restaurant successfully added.");
-      res.redirect("/restaurants");
+  geocoder.geocode(req.body.location, function(err, data) {
+    if (err || !data.length) {
+      req.flash("error", "Invalid address");
+      return res.redirect("back");
     }
+    var lat = data[0].latitude;
+    var lng = data[0].longitude;
+    var location = data[0].formattedAddress;
+    var newRestaurant = {
+      name: name,
+      image: image,
+      cost: cost,
+      description: desc,
+      author: author,
+      location: location,
+      lat: lat,
+      lng: lng
+    };
+    // Create a new campground and save to DB
+    Restaurant.create(newRestaurant, function(err, newlyCreated) {
+      if (err) {
+        console.log(err);
+      } else {
+        //redirect back to restaurants page
+        console.log(newlyCreated);
+        res.redirect("/restaurants");
+      }
+    });
   });
 });
 
@@ -74,20 +122,33 @@ router.get(
   }
 );
 
-// RESTAURANT UPDATE ROUTE
+// UPDATE RESTAURANTS ROUTE
 router.put("/restaurants/:id", middleware.checkRestaurantOwnership, function(
   req,
   res
 ) {
-  Restaurant.findByIdAndUpdate(req.params.id, req.body.restaurant, function(
-    err,
-    updatedRestaurant
-  ) {
-    if (err) {
-      res.redirect("/restaurants");
-    } else {
-      res.redirect("/restaurants/" + req.params.id);
+  geocoder.geocode(req.body.location, function(err, data) {
+    if (err || !data.length) {
+      console.log(err.message);
+      req.flash("error", "Invalid address");
+      return res.redirect("back");
     }
+    req.body.restaurant.lat = data[0].latitude;
+    req.body.restaurant.lng = data[0].longitude;
+    req.body.restaurant.location = data[0].formattedAddress;
+
+    Restaurant.findByIdAndUpdate(req.params.id, req.body.restaurant, function(
+      err,
+      restaurant
+    ) {
+      if (err) {
+        req.flash("error", err.message);
+        res.redirect("back");
+      } else {
+        req.flash("success", "Successfully Updated!");
+        res.redirect("/restaurants/" + restaurant._id);
+      }
+    });
   });
 });
 
@@ -105,5 +166,9 @@ router.delete("/restaurants/:id", middleware.checkRestaurantOwnership, function(
     }
   });
 });
+
+function escapeRegex(text) {
+  return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+}
 
 module.exports = router;

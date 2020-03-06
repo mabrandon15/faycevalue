@@ -1,3 +1,5 @@
+require("dotenv").config;
+
 var express = require("express");
 var app = express();
 var bodyParser = require("body-parser");
@@ -9,6 +11,7 @@ var methodOverride = require("method-override");
 var Restaurant = require("./models/restaurant");
 var Comment = require("./models/comment");
 var User = require("./models/user");
+var url = process.env.DATABASEURL || "mongodb://localhost/fayce_value";
 
 // requiring routes
 var restaurantRoutes = require("./routes/restaurants");
@@ -18,14 +21,13 @@ var indexRoutes = require("./routes/index");
 mongoose.set("useNewUrlParser", true);
 mongoose.set("useUnifiedTopology", true);
 mongoose.set("useFindAndModify", false);
-mongoose.connect(
-  "mongodb+srv://mabrandon15:985BabttwisbTwsfe@cluster0-7m7wu.mongodb.net/fayce_value?retryWrites=true&w=majority"
-);
+mongoose.connect(url);
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + "/public"));
 app.use(methodOverride("_method"));
 app.use(flash());
+app.locals.moment = require("moment");
 
 // passport configuration
 app.use(

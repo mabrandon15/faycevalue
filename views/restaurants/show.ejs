@@ -9,12 +9,12 @@
       <div class="card">
         <img class="card-img-top" src="<%= restaurant.image %>" />
         <div class="card-body">
-          <p class="float-right">$9.00/night</p>
+          <h4 class="float-right">$<%= restaurant.cost %>/person</h4>
           <h4 class="card-title"><a href=""><%= restaurant.name %></a></h4>
           <p class="card-text"><%= restaurant.description %></p>
           <p>
             <em>
-              Submitted by <%= restaurant.author.username %>
+              Submitted by <%= restaurant.author.username %>, <%= moment(restaurant.createdAt).fromNow() %>
             </em>
           </p>
           <% if (currentUser && restaurant.author.id.equals(currentUser._id)) {
@@ -55,7 +55,7 @@
                     </div>
                     <div id="comment-right" class="float-right">
                       <p>
-                        10 days ago
+                        <%= moment(comment.createdAt).fromNow() %>
                       </p>
                       <% if (currentUser && comment.author.id.equals(currentUser._id)) { %>
                         <div id="comment-buttons" class="float-right">
@@ -84,5 +84,35 @@
 </div>
 
 <a href="/restaurants">Go back!</a>
+
+<script>
+  function initMap() {
+    var lat = <%= restaurant.lat %>;
+    var lng = <%= restaurant.lng %>;
+    var center = {lat: lat, lng: lng };
+    var map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 8,
+        center: center,
+        scrollwheel: false
+    });
+    var contentString = `
+      <strong><%= restaurant.name %><br />
+      <%= restaurant.location %></strong>
+      <p><%= restaurant.description %></p>
+    `
+    var infowindow = new google.maps.InfoWindow({
+      content: contentString
+    });
+    var marker = new google.maps.Marker({
+        position: center,
+        map: map
+    });
+    marker.addListener('click', function() {
+      infowindow.open(map, marker);
+    });
+  }
+</script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAIJSQaidFW2nTaVB6AvSUILX7cXDRfzzk
+&callback=initMap"></script>
 
 <%- include("../partials/footer") %>

@@ -17,7 +17,7 @@
               Submitted by <%= restaurant.author.username %>, <%= moment(restaurant.createdAt).fromNow() %>
             </em>
           </p>
-          <% if (currentUser && restaurant.author.id.equals(currentUser._id)) {
+          <% if (currentUser && restaurant.author.id.equals(currentUser._id) || currentUser && currentUser.isAdmin) {
           %>
           <a
             class="btn btn-warning"
@@ -57,7 +57,7 @@
                       <p>
                         <%= moment(comment.createdAt).fromNow() %>
                       </p>
-                      <% if (currentUser && comment.author.id.equals(currentUser._id)) { %>
+                      <% if (currentUser && comment.author.id.equals(currentUser._id) || currentUser && currentUser.isAdmin) { %>
                         <div id="comment-buttons" class="float-right">
                           <a class="btn btn-sm btn-warning" href="/restaurants/<%= restaurant._id %>/comments/<%= comment._id %>/edit">
                             Edit

@@ -1,11 +1,4 @@
 <%- include("./partials/header") %>
-<!-- <h1>Sign Up</h1>
-
-<form action="/register" method="POST">
-  <input type="text" name="username" placeholder="username" />
-  <input type="password" name="password" placeholder="password" />
-  <button>Sign Up</button>
-</form> -->
 
 <div class="row">
   <div class="col-md-12">
@@ -29,6 +22,14 @@
         name="password"
         placeholder="Password"
         required
+      />
+      <label for="inputAdminCode" class="sr-only">Admin Code</label>
+      <input
+        type="text"
+        id="inputAdminCode"
+        class="form-control"
+        name="adminCode"
+        placeholder="Admin code"
       />
 
       <button class="btn btn-lg btn-primary btn-block" type="submit">

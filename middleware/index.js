@@ -9,7 +9,10 @@ middlewareObj.checkRestaurantOwnership = function(req, res, next) {
         req.flash("error", "Restaurant not found.");
         res.redirect("back");
       } else {
-        if (foundRestaurant.author.id.equals(req.user._id)) {
+        if (
+          foundRestaurant.author.id.equals(req.user._id) ||
+          req.user.isAdmin
+        ) {
           next();
         } else {
           req.flash("error", "You do not have permission to do that.");
@@ -33,7 +36,7 @@ middlewareObj.checkCommentOwnership = function checkCommentOwnership(
       if (err) {
         res.redirect("back");
       } else {
-        if (foundComment.author.id.equals(req.user._id)) {
+        if (foundComment.author.id.equals(req.user._id) || req.user.isAdmin) {
           next();
         } else {
           req.flash("error", "You do not have permission.");

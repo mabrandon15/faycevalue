@@ -63,3 +63,28 @@ body {
   height: 30vh;
   object-fit: cover;
 }
+
+#newCommentLeftBorder {
+  border-left: 5px solid #00c851;
+}
+
+#noComment {
+  color: grey;
+}
+
+#currentUser {
+  color: orange;
+}
+
+#notCurrentUser {
+  color: black;
+}
+
+#delete-form {
+  display: inline;
+}
+
+#editCommentLeftBorder {
+  border-left: 5px solid #ffbb33;
+  margin-top: 15px;
+}

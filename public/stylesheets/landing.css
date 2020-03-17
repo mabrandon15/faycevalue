@@ -76,6 +76,12 @@ body {
   }
 }
 
+#search {
+  display: inline-block;
+  width: auto;
+  vertical-align: middle;
+}
+
 /* Older browser support - .no-cssanimations class added by modernizr */
 .no-cssanimations .slideshow li {
   opacity: 1;

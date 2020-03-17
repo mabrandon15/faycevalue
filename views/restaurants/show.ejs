@@ -6,23 +6,25 @@
       <div id="map"></div>
     </div>
     <div class="col-md-9">
-      <div class="card">
+      <div class="card mb-2">
         <img class="card-img-top" src="<%= restaurant.image %>" />
         <div class="card-body">
           <h4 class="float-right">$<%= restaurant.cost %>/person</h4>
           <h4 class="card-title"><a href=""><%= restaurant.name %></a></h4>
           <p class="card-text"><%= restaurant.description %></p>
           <p>
-            <em>
-              Submitted by <%= restaurant.author.username %>, <%= moment(restaurant.createdAt).fromNow() %>
-            </em>
+            <strong>Submitted by:</strong>
+            <em><%= restaurant.author.username %></em>
+            <br />
+            <strong>Posted:</strong>
+            <em><%= moment(restaurant.createdAt).fromNow() %></em>
           </p>
-          <% if (currentUser && restaurant.author.id.equals(currentUser._id) || currentUser && currentUser.isAdmin) {
-          %>
+          <% if (currentUser && restaurant.author.id.equals(currentUser._id) ||
+          currentUser && currentUser.isAdmin) { %>
           <a
             class="btn btn-warning"
             href="/restaurants/<%= restaurant._id %>/edit"
-            >Edit Restaurant</a
+            >Edit</a
           >
           <form
             class="delete-form"
@@ -38,52 +40,154 @@
         <div class="card-body">
           <div class="text-right">
             <a
-              class="btn btn-success"
-              href="/restaurants/<%= restaurant._id %>/comments/new"
-              >Add Comment</a
+              class="btn btn-sm btn-success float-right"
+              role="button"
+              data-toggle="collapse"
+              href="#collapseComment"
+              aria-expanded="false"
+              aria-controls="collapseComment"
+            >
+              <i class="fas fa-plus"></i>
+              Add new comment</a
             >
           </div>
+          <h4>
+            <strong>Comments </strong>
+            <i class="fas fa-comment-alt"></i>
+          </h4>
+          <div class="collapse" id="collapseComment">
+            <div class="card" id="newCommentLeftBorder">
+              <div class="card-body">
+                <% if(!currentUser) { %>
+                <p>
+                  You need to login before you can comment.
+                  <a href="/login">Click here</a> to go to the login page.
+                </p>
+                <% } %> <% if(currentUser) { %>
+                <h4>
+                  Write your comment
+                  <i class="fas fa-pencil-alt"></i>
+                </h4>
+                <form
+                  id="add-comment-form"
+                  action="/restaurants/<%= restaurant._id %>/comments"
+                  method="POST"
+                >
+                  <div class="form-group">
+                    <input
+                      class="form-control"
+                      type="text"
+                      disabled
+                      value="<%= currentUser.username %>"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <textarea
+                      class="form-control"
+                      name="comment[text]"
+                      placeholder="Write your comment..."
+                      form="add-comment-form"
+                      rows="5"
+                      cols="70"
+                    ></textarea>
+                  </div>
+                  <div class="form-group">
+                    <button class="btn btn-success btn-sm">
+                      Comment
+                      <i class="fas fa-comment-alt"></i>
+                    </button>
+                  </div>
+                </form>
+                <% } %>
+              </div>
+            </div>
+          </div>
           <hr />
-          <div class="row"></div>
-            <% restaurant.comments.forEach(function(comment) { %>
-              <div class="col-md-12">
-                <div class="card">
-                  <div class="card-body">
-                    <div class="float-left w-75">
-                      <p class="card-title"><%= comment.author.username %></p>
-                      <p class="card-text"><%= comment.text %></p>
-                    </div>
-                    <div id="comment-right" class="float-right">
-                      <p>
-                        <%= moment(comment.createdAt).fromNow() %>
-                      </p>
-                      <% if (currentUser && comment.author.id.equals(currentUser._id) || currentUser && currentUser.isAdmin) { %>
-                        <div id="comment-buttons" class="float-right">
-                          <a class="btn btn-sm btn-warning" href="/restaurants/<%= restaurant._id %>/comments/<%= comment._id %>/edit">
-                            Edit
-                          </a>
-                          <form
-                            action="/restaurants/<%= restaurant._id %>/comments/<%= comment._id %>?_method=DELETE"
-                            method="POST"
-                            class="delete-form"
-                          >
-                            <button class="btn btn-sm btn-danger"/>Delete</button>
-                          </form>
-                          </div>
-                        <% } %>
+          <% if (restaurant.comments.length === 0) { %>
+          <em id="noComment">No comments yet.</em>
+          <% } %>
+          <!-- prettier-ignore -->
+
+          <% restaurant.comments.forEach(function(comment) { %>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="card-body py-0">
+                <strong>
+                  <% if (currentUser &&
+                  currentUser._id.equals(comment.author.id)) { %>
+                  <i id="currentUser" class="fas fa-user"></i>
+                  <% } else { %>
+                  <i id="notCurrentUser" class="fas fa-user"></i>
+                  <% } %> <%= comment.author.username %>
+                </strong>
+                <span class="float-right"
+                  ><%= moment(comment.createdAt).fromNow() %></span
+                >
+                <p><%= comment.text %></p>
+                <% if (currentUser && currentUser._id.equals(comment.author.id)
+                || currentUser && currentUser.isAdmin) { %>
+                <a
+                  class="btn btn-sm btn-warning"
+                  role="button"
+                  data-toggle="collapse"
+                  href="#collapseEdit<%= comment._id %>"
+                  aria-expanded="false"
+                  aria-controls="collapse<%= comment._id %>"
+                >
+                  Edit</a
+                >
+                <form
+                  id="delete-form"
+                  action="/restaurants/<%= restaurant._id %>/comments/<%= comment._id %>?_method=DELETE"
+                  method="POST"
+                >
+                  <button class="btn btn-sm btn-danger">Delete</button>
+                </form>
+                <div class="collapse" id="collapseEdit<%= comment._id %>">
+                  <div id="editCommentLeftBorder" class="card">
+                    <div class="card-body">
+                      <h4>
+                        Edit your comment
+                        <i class="fas fa-pencil-alt"></i>
+                      </h4>
+                      <form
+                        id="edit-comment-form<%= comment._id %>"
+                        action="/restaurants/<%= restaurant._id %>/comments/<%= comment._id %>?_method=PUT"
+                        method="POST"
+                      >
+                        <div class="form-group">
+                          <input
+                            class="form-control"
+                            type="text"
+                            disabled
+                            value="<%= currentUser.username %>"
+                          />
+                        </div>
+                        <div class="form-group">
+                          <!-- prettier-ignore -->
+                          <textarea class="form-control" name="comment[text]" form="edit-comment-form<%= comment._id %>" rows="5" cols="70"><%=comment.text%></textarea>
+                        </div>
+                        <div class="form-group">
+                          <button class="btn btn-warning btn-sm">
+                            Edit comment
+                            <i class="fas fa-comment-alt"></i>
+                          </button>
+                        </div>
+                      </form>
                     </div>
                   </div>
                 </div>
+                <% } %>
+                <hr />
               </div>
-            <% }) %>
+            </div>
           </div>
+          <% }) %>
         </div>
       </div>
     </div>
   </div>
 </div>
-
-<a href="/restaurants">Go back!</a>
 
 <script>
   function initMap() {
@@ -112,7 +216,10 @@
     });
   }
 </script>
-<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDegVIU7nXFQ7GjEfxi5xYiroi3e8RBShM
-&callback=initMap"></script>
+<script
+  async
+  defer
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDegVIU7nXFQ7GjEfxi5xYiroi3e8RBShM&callback=initMap"
+></script>
 
 <%- include("../partials/footer") %>
